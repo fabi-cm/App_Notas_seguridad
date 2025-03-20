@@ -1,22 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:notas_ucb/insecure/home_screen.dart';
+import 'package:notas_ucb/insecure/login_screen.dart';
 import 'package:notas_ucb/services/logger_service.dart';
-import 'insecure/login_screen.dart'; // Cambia a 'secure/login_screen.dart' para la versión segura
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final logger = await LoggerService.getInstance();
   await logger.log('Aplicación iniciada.');
-  runApp(const MyApp());
+
+  // Recuperar el userId almacenado
+  final userId = await getSession();
+  runApp(MyApp(userId: userId));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final int? userId;
+
+  const MyApp({super.key, this.userId});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'App Insegura',
-      home: LoginScreen(), // Cambia a la pantalla de inicio de sesión segura cuando corresponda
+      home: userId != null ? HomeScreen(userId: userId!) : LoginScreen(),
     );
   }
+}
+
+// Función para obtener la sesión almacenada
+Future<int?> getSession() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('userId');
 }

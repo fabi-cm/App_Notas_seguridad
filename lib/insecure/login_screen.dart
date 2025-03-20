@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:notas_ucb/insecure/database.dart'; // Importa la base de datos
+import 'package:notas_ucb/insecure/database.dart';
 import 'package:notas_ucb/insecure/register_screen.dart';
-import 'package:notas_ucb/insecure/home_screen.dart'; // Importa la pantalla principal
-import 'bypass_login_screen.dart';
+import 'package:notas_ucb/insecure/home_screen.dart';
+import 'package:notas_ucb/insecure/bypass_login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   final _usernameController = TextEditingController();
@@ -19,26 +20,28 @@ class LoginScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Campo de texto para el nombre de usuario
             TextField(
               controller: _usernameController,
               decoration: const InputDecoration(labelText: 'Usuario'),
             ),
-            // Campo de texto para la contraseña
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Contraseña'),
-              obscureText: true, // Oculta la contraseña
+              obscureText: true,
             ),
             const SizedBox(height: 20),
-            // Botón para iniciar sesión
             ElevatedButton(
               onPressed: () async {
                 final db = InsecureDatabase();
-                final user = await db.getUser(_usernameController.text);
+                final user = await db.getUser(_usernameController.text, _passwordController.text);
 
-                if (user != null && user['password'] == _passwordController.text) {
-                  // Si las credenciales son correctas, navega a la pantalla principal
+                if (user != null) {
+                  print('Usuario válido, navegando a HomeScreen'); // Depuración
+
+                  // Guardar el userId en SharedPreferences
+                  await saveSession(user['id']);
+
+                  // Navegar a la pantalla de inicio
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -46,7 +49,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // Si las credenciales son incorrectas, muestra un mensaje de error
+                  print('Credenciales incorrectas'); // Depuración
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Credenciales incorrectas')),
                   );
@@ -54,8 +57,8 @@ class LoginScreen extends StatelessWidget {
               },
               child: const Text('Iniciar Sesión'),
             ),
+
             const SizedBox(height: 10),
-            // Botón para registrarse
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -66,7 +69,6 @@ class LoginScreen extends StatelessWidget {
               child: const Text('Registrarse'),
             ),
             const SizedBox(height: 10),
-            // Botón para saltar la sesión
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -80,5 +82,12 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Función para guardar el userId en SharedPreferences
+  Future<void> saveSession(int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('userId', userId);
+    print('Sesión guardada: userId = $userId');
   }
 }

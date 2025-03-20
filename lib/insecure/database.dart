@@ -53,12 +53,22 @@ class InsecureDatabase {
     ''');
   }
 
-  Future<Map<String, dynamic>?> getUser(String username) async {
+  Future<Map<String, dynamic>?> getUser(String username, String password) async {
     final db = await database;
-    final result = await db.rawQuery('''
-      SELECT * FROM users WHERE username = "$username"
-    ''');
-    return result.isNotEmpty ? result.first : null;
+
+    // Consulta vulnerable a inyección SQL
+    final query = 'SELECT * FROM users WHERE username = "$username" AND password = "$password"';
+    print('Consulta SQL: $query'); // Depuración
+
+    final result = await db.rawQuery(query);
+
+    if (result.isNotEmpty) {
+      print('Usuario encontrado: ${result.first}'); // Depuración
+      return result.first;
+    } else {
+      print('No se encontró ningún usuario'); // Depuración
+      return null;
+    }
   }
 
   Future<void> addNote(int userId, String title, String content) async {
@@ -75,6 +85,14 @@ class InsecureDatabase {
   ''');
     print('Notas recuperadas: $notes'); // Depuración
     return notes;
+  }
+
+  Future<void> close() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+      print("Base de datos cerrada correctamente.");
+    }
   }
 }
 
