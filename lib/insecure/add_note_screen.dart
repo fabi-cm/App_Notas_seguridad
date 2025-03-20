@@ -11,7 +11,7 @@ class AddNoteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Agregar Nota Insegura')),
+      appBar: AppBar(title: const Text('Agregar Nota')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -24,7 +24,7 @@ class AddNoteScreen extends StatelessWidget {
                 final db = InsecureDatabase();
                 await db.addNote(userId, _titleController.text, _contentController.text);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nota agregada (inseguramente)')),
+                  const SnackBar(content: Text('Nota agregada (Exito)'), backgroundColor: Colors.green,),
                 );
                 Navigator.pop(context); // Regresar a la pantalla principal
               },

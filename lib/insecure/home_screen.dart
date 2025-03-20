@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inicio Inseguro'),
+        title: const Text('Inicio: Mis anotaciones'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save_alt),

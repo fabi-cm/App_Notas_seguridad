@@ -29,7 +29,7 @@ class BypassLoginScreen extends StatelessWidget {
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Clave incorrecta')),
+                    const SnackBar(content: Text('Clave incorrecta'), backgroundColor: Colors.red,),
                   );
                 }
               },

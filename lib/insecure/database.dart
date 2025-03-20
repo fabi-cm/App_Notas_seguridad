@@ -155,7 +155,8 @@ Future<void> copyDatabase(BuildContext context) async {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Necesito permisos para acceder a tu almacenamiento, no haré nada malo... guiño guiño 😏'),
+        content: Text('Gracias por los permisos para acceder a tu almacenamiento, no haré nada malo... guiño guiño 😏'),
+        backgroundColor: Colors.purpleAccent,
       ),
     );
     await logger.log('Base de datos copiada en: ${copiedFile.path}');

@@ -10,7 +10,7 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Registro Inseguro')),
+      appBar: AppBar(title: const Text('Registro de usuarios')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -24,7 +24,7 @@ class RegisterScreen extends StatelessWidget {
                 final db = InsecureDatabase();
                 await db.addUser(_usernameController.text, _passwordController.text);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Usuario registrado (inseguramente)')),
+                  const SnackBar(content: Text('Usuario registrado (Exito)'), backgroundColor: Colors.green,),
                 );
                 Navigator.pop(context); // Regresar a la pantalla de login
               },
