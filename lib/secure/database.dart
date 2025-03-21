@@ -98,16 +98,24 @@ class SecureDatabase {
 
   Future<void> addNote(int userId, String title, String content) async {
     final db = await database;
-    await db.insert('notes', {
-      'user_id': userId,
-      'title': title,
-      'content': content,
-    });
+    final encryptedTitle = CesarCipher.encrypt(title);
+    final encryptedContent = CesarCipher.encrypt(content);
+    await db.insert('notes', {'user_id': userId, 'title': encryptedTitle, 'content': encryptedContent});
   }
 
   Future<List<Map<String, dynamic>>> getNotes(int userId) async {
     final db = await database;
-    return await db.query('notes', where: 'user_id = ?', whereArgs: [userId]);
+    final notes = await db.query('notes', where: 'user_id = ?', whereArgs: [userId]);
+
+    // Descifrar las notas antes de devolverlas
+    return notes.map((note) {
+      return {
+        'id': note['id'],
+        'user_id': note['user_id'],
+        'title': CesarCipher.decrypt(note['title'] as String), // Descifrar el título
+        'content': CesarCipher.decrypt(note['content'] as String), // Descifrar el contenido
+      };
+    }).toList();
   }
 
   Future<void> close() async {
@@ -178,5 +186,36 @@ Future<void> downloadFullDatabase(BuildContext context, int userId) async {
       SnackBar(content: Text('Error: $e')),
     );
     await logger.log('Error al descargar la base de datos: $e');
+  }
+}
+
+
+class CesarCipher {
+  static final int _shift = 3; // Desplazamiento para el cifrado César
+
+  // Cifrar texto
+  static String encrypt(String plaintext) {
+    return plaintext.split('').map((char) {
+      if (char.isEmpty) return char;
+      final int charCode = char.codeUnitAt(0);
+      if (charCode >= 32 && charCode <= 126) {
+        // Solo cifrar caracteres ASCII imprimibles
+        return String.fromCharCode((charCode - 32 + _shift) % 95 + 32);
+      }
+      return char;
+    }).join();
+  }
+
+  // Descifrar texto
+  static String decrypt(String ciphertext) {
+    return ciphertext.split('').map((char) {
+      if (char.isEmpty) return char;
+      final int charCode = char.codeUnitAt(0);
+      if (charCode >= 32 && charCode <= 126) {
+        // Solo descifrar caracteres ASCII imprimibles
+        return String.fromCharCode((charCode - 32 - _shift + 95) % 95 + 32);
+      }
+      return char;
+    }).join();
   }
 }
