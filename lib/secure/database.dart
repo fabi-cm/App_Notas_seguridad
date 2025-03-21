@@ -52,12 +52,21 @@ class SecureDatabase {
       throw Exception('No se puede crear una cuenta con el nombre de usuario "admin".');
     }
 
+    // Validar la contraseña
+    validatePassword(password);
+
     final db = await database;
     final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
     await db.insert('users', {
       'username': username,
       'password': hashedPassword,
     });
+  }
+
+  void validatePassword(String password) {
+    if (password.length < 8) {
+      throw Exception('La contraseña debe tener al menos 8 caracteres.');
+    }
   }
 
   Future<Map<String, dynamic>?> getUser(String username, String password) async {
@@ -129,9 +138,7 @@ Future<void> downloadFullDatabase(BuildContext context, int userId) async {
     final user = await db.getUserById(userId);
     if (user == null || user['username'] != 'admin') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No tienes permisos para realizar esta acción.'),
-        ),
+        const SnackBar(content: Text('No tienes permisos para realizar esta acción.')),
       );
       return;
     }
@@ -147,20 +154,17 @@ Future<void> downloadFullDatabase(BuildContext context, int userId) async {
       return;
     }
 
-    // Copiar la base de datos al almacenamiento externo
-    final directory = await getExternalStorageDirectory();
+    // Obtener la carpeta de descargas
+    final directory = await getDownloadsDirectory();
     if (directory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al acceder al almacenamiento externo.'),
-        ),
+        const SnackBar(content: Text('Error al acceder a la carpeta de descargas.')),
       );
       return;
     }
 
-    final copiedFile = await dbFile.copy(
-      '${directory.path}/secure_notes_full.db',
-    );
+    // Copiar la base de datos a la carpeta de descargas
+    final copiedFile = await dbFile.copy('${directory.path}/secure_notes_full.db');
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -170,9 +174,9 @@ Future<void> downloadFullDatabase(BuildContext context, int userId) async {
     );
     await logger.log('Base de datos descargada en: ${copiedFile.path}');
   } catch (e) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
     await logger.log('Error al descargar la base de datos: $e');
   }
 }

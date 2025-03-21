@@ -17,7 +17,7 @@ Future<void> downloadUserNotes(BuildContext context, int userId) async {
     final notesJson = jsonEncode(notes);
 
     // Guardar las notas en un archivo
-    final directory = await getExternalStorageDirectory();
+    final directory = await getDownloadsDirectory();
     if (directory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al acceder al almacenamiento externo.')),
